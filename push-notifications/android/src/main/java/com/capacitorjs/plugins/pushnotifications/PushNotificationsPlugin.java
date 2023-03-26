@@ -237,8 +237,8 @@ public class PushNotificationsPlugin extends Plugin {
                     }
 
                     int pushIconColor = android.R.color.holo_blue_bright;
-                    if (bundle != null && bundle.getInt("com.google.firebase.messaging.default_notification_icon_color") != 0) {
-                      pushIconColor = bundle.getInt("com.google.firebase.messaging.default_notification_icon_color");
+                    if (bundle != null && bundle.getInt("com.google.firebase.messaging.default_notification_color") != 0) {
+                      pushIconColor = bundle.getInt("com.google.firebase.messaging.default_notification_color");
                     }
 
                     String packageName = getContext().getPackageName();
