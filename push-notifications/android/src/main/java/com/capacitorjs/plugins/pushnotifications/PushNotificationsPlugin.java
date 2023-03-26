@@ -238,6 +238,7 @@ public class PushNotificationsPlugin extends Plugin {
                         getContext(),
                         NotificationChannelManager.FOREGROUND_NOTIFICATION_CHANNEL_ID
                     )
+                        .setAutoCancel(true)
                         .setSmallIcon(pushIcon)
                         .setContentTitle(title)
                         .setContentText(body)
