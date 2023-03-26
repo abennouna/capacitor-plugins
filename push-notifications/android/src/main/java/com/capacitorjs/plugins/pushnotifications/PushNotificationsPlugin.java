@@ -2,6 +2,7 @@ package com.capacitorjs.plugins.pushnotifications;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -20,6 +21,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Iterator;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -240,6 +242,30 @@ public class PushNotificationsPlugin extends Plugin {
                     if (bundle != null && bundle.getInt("com.google.firebase.messaging.default_notification_icon_color") != 0) {
                       pushIconColor = bundle.getInt("com.google.firebase.messaging.default_notification_icon_color");
                     }
+
+                    String packageName = getContext().getPackageName();
+                    Intent intent = getContext()
+                        .getPackageManager()
+                        .getLaunchIntentForPackage(packageName);
+
+                    int now = (int) (System.currentTimeMillis() / 1000);
+                    intent.putExtra("google.message_id", now);
+
+                    for (Iterator<String> it = data.keys(); it.hasNext(); ) {
+                      String key = it.next();
+                      intent.putExtra(key, data.getString(key));
+                    }
+
+                    int flags = PendingIntent.FLAG_CANCEL_CURRENT;
+                    if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                       flags = flags | PendingIntent.FLAG_MUTABLE;
+                    }
+
+                    PendingIntent pendingIntent = PendingIntent.getActivity(getContext(),
+                        (int) (System.currentTimeMillis() / 1000),
+                        intent,
+                        flags);
+
                     NotificationCompat.Builder builder = new NotificationCompat.Builder(
                         getContext(),
                         NotificationChannelManager.FOREGROUND_NOTIFICATION_CHANNEL_ID
@@ -249,7 +275,9 @@ public class PushNotificationsPlugin extends Plugin {
                         .setColor(ContextCompat.getColor(getContext(), pushIconColor))
                         .setContentTitle(title)
                         .setContentText(body)
+                        .setContentIntent(pendingIntent)
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
                     notificationManager.notify(0, builder.build());
                 }
             }
