@@ -232,37 +232,35 @@ public class PushNotificationsPlugin extends Plugin {
                     }
                     int pushIcon = android.R.drawable.ic_dialog_info;
 
-                    if (bundle != null && bundle.getInt("com.google.firebase.messaging.default_notification_icon") != 0) {
+                    // Cleaner
+                    // https://github.com/ionic-team/capacitor-plugins/pull/1423/files#diff-59ac8897f6d31331d2e9e7de60f4c09028a8045c148f0597d46139e015055dd2R237
+                    if (bundle != null && bundle.containsKey("com.google.firebase.messaging.default_notification_icon")) {
                         pushIcon = bundle.getInt("com.google.firebase.messaging.default_notification_icon");
                     }
 
+                    // Cleaner
+                    // https://github.com/ionic-team/capacitor-plugins/pull/1423/files#diff-59ac8897f6d31331d2e9e7de60f4c09028a8045c148f0597d46139e015055dd2R237
                     int pushIconColor = android.R.color.holo_blue_bright;
-                    if (bundle != null && bundle.getInt("com.google.firebase.messaging.default_notification_color") != 0) {
+                    if (bundle != null && bundle.containsKey("com.google.firebase.messaging.default_notification_color")) {
                       pushIconColor = bundle.getInt("com.google.firebase.messaging.default_notification_color");
                     }
 
-                    String packageName = getContext().getPackageName();
-                    Intent intent = getContext()
-                        .getPackageManager()
-                        .getLaunchIntentForPackage(packageName);
+                    // Cleaner:
+                    // - https://github.com/ionic-team/capacitor-plugins/pull/1423/files#diff-59ac8897f6d31331d2e9e7de60f4c09028a8045c148f0597d46139e015055dd2R240
+                    // - https://github.com/ionic-team/capacitor-plugins/pull/1478/files#diff-59ac8897f6d31331d2e9e7de60f4c09028a8045c148f0597d46139e015055dd2R243
+                    Intent intent = new Intent(getContext(), getActivity().getClass());
+                    intent.putExtras(remoteMessage.toIntent().getExtras());
 
                     int now = (int) (System.currentTimeMillis() / 1000);
                     intent.putExtra("google.message_id", now);
 
-                    for (Iterator<String> it = data.keys(); it.hasNext(); ) {
-                      String key = it.next();
-                      intent.putExtra(key, data.getString(key));
-                    }
-
-                    int flags = PendingIntent.FLAG_CANCEL_CURRENT;
-                    if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                       flags = flags | PendingIntent.FLAG_MUTABLE;
-                    }
-
+                    // better
+                    // - https://github.com/ionic-team/capacitor-plugins/pull/1423/files#diff-59ac8897f6d31331d2e9e7de60f4c09028a8045c148f0597d46139e015055dd2R246
+                    // - https://github.com/ionic-team/capacitor-plugins/pull/1478/files#diff-59ac8897f6d31331d2e9e7de60f4c09028a8045c148f0597d46139e015055dd2R249
                     PendingIntent pendingIntent = PendingIntent.getActivity(getContext(),
                         (int) (System.currentTimeMillis() / 1000),
                         intent,
-                        flags);
+                        PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
                     NotificationCompat.Builder builder = new NotificationCompat.Builder(
                         getContext(),
