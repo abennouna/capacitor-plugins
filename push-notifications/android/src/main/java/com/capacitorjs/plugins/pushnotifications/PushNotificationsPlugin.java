@@ -258,7 +258,7 @@ public class PushNotificationsPlugin extends Plugin {
                     // - https://github.com/ionic-team/capacitor-plugins/pull/1423/files#diff-59ac8897f6d31331d2e9e7de60f4c09028a8045c148f0597d46139e015055dd2R246
                     // - https://github.com/ionic-team/capacitor-plugins/pull/1478/files#diff-59ac8897f6d31331d2e9e7de60f4c09028a8045c148f0597d46139e015055dd2R249
                     PendingIntent pendingIntent = PendingIntent.getActivity(getContext(),
-                        (int) (System.currentTimeMillis() / 1000),
+                        now,
                         intent,
                         PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
