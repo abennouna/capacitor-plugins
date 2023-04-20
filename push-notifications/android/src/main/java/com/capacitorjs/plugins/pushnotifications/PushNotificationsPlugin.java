@@ -19,7 +19,6 @@ import com.getcapacitor.annotation.Permission;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
 import java.util.Arrays;
-import java.util.Iterator;
 import org.json.JSONException;
 import org.json.JSONObject;
 
