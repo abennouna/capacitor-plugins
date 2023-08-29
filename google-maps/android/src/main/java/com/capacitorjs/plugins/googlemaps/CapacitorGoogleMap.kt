@@ -886,7 +886,7 @@ class CapacitorGoogleMap(
     fun setClusterListeners() {
         CoroutineScope(Dispatchers.Main).launch {
             clusterManager?.setOnClusterItemClickListener {
-                if (null == it.googleMapMarker) false
+                if (null == it || null == it.googleMapMarker) false
                 else this@CapacitorGoogleMap.onMarkerClick(it.googleMapMarker!!)
             }
 
