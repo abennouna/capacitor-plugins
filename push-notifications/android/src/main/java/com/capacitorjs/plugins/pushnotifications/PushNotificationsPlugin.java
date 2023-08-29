@@ -3,6 +3,7 @@ package com.capacitorjs.plugins.pushnotifications;
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -12,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 import com.getcapacitor.*;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.annotation.Permission;
@@ -272,17 +274,48 @@ public class PushNotificationsPlugin extends Plugin {
 
                     int pushIcon = android.R.drawable.ic_dialog_info;
 
-                    if (bundle != null && bundle.getInt("com.google.firebase.messaging.default_notification_icon") != 0) {
+                    // Cleaner
+                    // https://github.com/ionic-team/capacitor-plugins/pull/1423/files#diff-59ac8897f6d31331d2e9e7de60f4c09028a8045c148f0597d46139e015055dd2R237
+                    if (bundle != null && bundle.containsKey("com.google.firebase.messaging.default_notification_icon")) {
                         pushIcon = bundle.getInt("com.google.firebase.messaging.default_notification_icon");
                     }
+
+                    // Cleaner
+                    // https://github.com/ionic-team/capacitor-plugins/pull/1423/files#diff-59ac8897f6d31331d2e9e7de60f4c09028a8045c148f0597d46139e015055dd2R237
+                    int pushIconColor = android.R.color.holo_blue_bright;
+                    if (bundle != null && bundle.containsKey("com.google.firebase.messaging.default_notification_color")) {
+                      pushIconColor = bundle.getInt("com.google.firebase.messaging.default_notification_color");
+                    }
+
+                    // Cleaner:
+                    // - https://github.com/ionic-team/capacitor-plugins/pull/1423/files#diff-59ac8897f6d31331d2e9e7de60f4c09028a8045c148f0597d46139e015055dd2R240
+                    // - https://github.com/ionic-team/capacitor-plugins/pull/1478/files#diff-59ac8897f6d31331d2e9e7de60f4c09028a8045c148f0597d46139e015055dd2R243
+                    Intent intent = new Intent(getContext(), getActivity().getClass());
+                    intent.putExtras(remoteMessage.toIntent().getExtras());
+
+                    int now = (int) (System.currentTimeMillis() / 1000);
+                    intent.putExtra("google.message_id", now);
+
+                    // better
+                    // - https://github.com/ionic-team/capacitor-plugins/pull/1423/files#diff-59ac8897f6d31331d2e9e7de60f4c09028a8045c148f0597d46139e015055dd2R246
+                    // - https://github.com/ionic-team/capacitor-plugins/pull/1478/files#diff-59ac8897f6d31331d2e9e7de60f4c09028a8045c148f0597d46139e015055dd2R249
+                    PendingIntent pendingIntent = PendingIntent.getActivity(getContext(),
+                        now,
+                        intent,
+                        PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
                     NotificationCompat.Builder builder = new NotificationCompat.Builder(
                         getContext(),
                         NotificationChannelManager.FOREGROUND_NOTIFICATION_CHANNEL_ID
                     )
+                        .setAutoCancel(true)
                         .setSmallIcon(pushIcon)
+                        .setColor(ContextCompat.getColor(getContext(), pushIconColor))
                         .setContentTitle(title)
                         .setContentText(body)
+                        .setContentIntent(pendingIntent)
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
                     notificationManager.notify(0, builder.build());
                 }
             }
